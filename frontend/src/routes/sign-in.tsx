@@ -1,5 +1,9 @@
-import { SignIn } from "@clerk/clerk-react"
- 
+import { SignIn } from "@clerk/clerk-react";
+
 export default function SignInPage() {
-  return <SignIn />;
+  return (
+    <main style={{display : 'flex' , justifyContent : 'center' , marginTop : '48px'}}>
+      <SignIn />
+    </main>
+  );
 }

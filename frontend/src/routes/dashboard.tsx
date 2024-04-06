@@ -1,47 +1,65 @@
 import { useAuth } from "@clerk/clerk-react";
-
-
+import { Button, Flex } from "@mantine/core";
+import { useEffect, useState } from "react";
+import { getHostedZones } from "../requests/aws";
+import { HostedZonesResponse } from "../requests/interfaces";
+import DomainCard from "../components/DomainCard";
 
 export default function DashboardPage() {
-
   const { getToken } = useAuth();
 
-  const fetchDataFromExternalResource = async () => {
-    const token = await getToken({skipCache : true ,  template : "JWT_AWS_Route53"});
+  const [token, setToken] = useState<string | null>(null);
+  const [data, setData] = useState<HostedZonesResponse | null>();
 
-    try {
-      const token = await getToken()
-      const response = await fetch('http://localhost:5000/', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-          // mode: 'cors',
-        },
-      })
+  useEffect(() => {
+    const fetchToken = async () => {
+      const tkn = await getToken();
 
-      console.log(response.json())
+      setToken(tkn);
 
-      if (!response.ok) {
-        throw new Error('Network response was not ok')
-      }
+      console.log("TOKEN: ", tkn);
+    };
 
-      const result = await response.json()
-      console.log("RESULT: " ,result)
-    } catch (err) {
-      console.log("ERROR: " , err)
-    }
-    
-    // Add logic to fetch your data
-    console.log("TOKEN: " ,token )
-  }
-
-  fetchDataFromExternalResource()
+    fetchToken();
+  }, []);
 
   return (
     <>
       <h1>Dashboard page</h1>
-      <p>This is a protected page.</p>
+      <br />
+      <p></p>
+
+      <ul>
+        <Button onClick={async () => setData(await getHostedZones(token))}>
+          Get Hosted Zones
+        </Button>
+      </ul>
+
+      {data && (
+        <div style={{padding : '8px'}}>
+          <h2>Hosted Zones</h2>
+          <Flex
+            gap="xl"
+            justify="flex-start"
+            align="center"
+            direction="row"
+            wrap="wrap"
+          >
+            {data.HostedZones.map((zone) => (
+              <div
+                key={zone.Id}
+                style={{
+                  border: "1px solid #ccc",
+                  padding: "10px",
+                  margin: "10px",
+                }}
+              >
+                <DomainCard data={zone} />
+              </div>
+            ))}
+          </Flex>
+        </div>
+      )}
     </>
   );
 }

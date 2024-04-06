@@ -8,7 +8,9 @@ const {Credentials} = require("@aws-sdk/types")
 
 var express = require("express");
 const { ClerkExpressRequireAuth } = require("@clerk/clerk-sdk-node");
-const cors = require('cors')
+const cors = require('cors');
+const  router = require("./domains");
+const bodyParser = require("body-parser");
 
 require("dotenv").config();
 var app = express();
@@ -16,37 +18,14 @@ var app = express();
 const port = 5000;
 
 app.use(cors());
+app.use(bodyParser.json());
 
 // app.use(clerkAuthMiddleware)
 
-app.get("/", ClerkExpressRequireAuth(), async (req, res) => {
-  //   console.log(req.query.userId);
-  //   const stsClient = new STSClient({region : 'global'});
 
-  //   var stsParams = {
-  //     RoleArn: arn,
-  //     DurationSeconds: 3600,
-  //     RoleSessionName: "app1", // any string
-  //   };
+app.use('/aws', router)
 
-  //   let stsCommand = new AssumeRoleCommand(stsParams);
-  //   const stsResp = await stsClient.send(stsCommand);
-  //   console.log({ stsResp });
-  //   res.json(stsResp)
-  //   client = new ConnectClient({
-  //     region: Region,
-  //     credentials: {
-  //       accessKeyId: stsResp.Credentials.AccessKeyId,
-  //       secretAccessKey: stsResp.Credentials.SecretAccessKey,
-  //       sessionToken: stsResp.Credentials.SessionToken,
-  //     },
-  //   });
-
-  console.log(req.auth)
-
-  // const response = await assumeRole();
-
-  // console.log(process.env.AWS_ACCESS_KEY_ID);
+app.get("/", async (req, res) => {
 
   res.json({done : "MESSAGE SENT"});
 });
@@ -55,12 +34,8 @@ app.listen(port, () => {
   console.log(`Server running on port ${port}.`);
 });
 
-// openssl s_client -servername keys.example.com -showcerts -connect keys.example.com:443
-
-// openssl s_client -servername smart-cub-63.clerk.accounts.dev -showcerts -connect smart-cub-63.clerk.accounts.dev:443
 
 async function assumeRole() {
-  //   const credentials = new fromEnv();
 
   const route53Client = new Route53Client({
     region: "global",
@@ -81,7 +56,5 @@ async function assumeRole() {
     console.error("Error:", error);
     return error
   }
-
-  // console.log(process.env.AWS_ACCESS_KEY_ID)
 
 }
