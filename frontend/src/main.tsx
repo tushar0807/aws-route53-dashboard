@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { MantineProvider } from "@mantine/core";
-import '@mantine/core/styles.css';
+import "@mantine/core/styles.css";
 
 import RootLayout from "./layouts/root-layout";
 import DashboardLayout from "./layouts/dashboard-layout";
@@ -13,6 +13,8 @@ import SignInPage from "./routes/sign-in";
 import SignUpPage from "./routes/sign-up";
 import DashboardPage from "./routes/dashboard";
 import DomainPage from "./routes/DomainPage";
+import { AuthProvider } from "./context/token";
+import Navbar from "./components/Navbar";
 
 const router = createBrowserRouter([
   {
@@ -24,8 +26,21 @@ const router = createBrowserRouter([
       {
         element: <DashboardLayout />,
         path: "dashboard",
-        children: [{ path: "/dashboard", element: <DashboardPage /> } , { path: ":id", element: <DomainPage /> }],
-
+        children: [
+          {
+            path: "/dashboard",
+            element: (
+              <>
+                <Navbar />
+                <DashboardPage />
+              </>
+            ),
+          },
+          { path: ":id", element: <>
+          <Navbar />
+          <DomainPage />
+        </> },
+        ],
       },
     ],
   },
@@ -33,13 +48,18 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <MantineProvider defaultColorScheme="dark" theme={{
-        fontFamily: 'Verdana, sans-serif',
-        fontFamilyMonospace: 'Monaco, Courier, monospace',
-        headings: { fontFamily: 'Greycliff CF, sans-serif' },
-        primaryColor : 'teal'
-      }}>
-      <RouterProvider router={router} />
-    </MantineProvider>
+    <AuthProvider>
+      <MantineProvider
+        defaultColorScheme="dark"
+        theme={{
+          fontFamily: "Verdana, sans-serif",
+          fontFamilyMonospace: "Monaco, Courier, monospace",
+          headings: { fontFamily: "Greycliff CF, sans-serif" },
+          primaryColor: "teal",
+        }}
+      >
+        <RouterProvider router={router} />
+      </MantineProvider>
+    </AuthProvider>
   </React.StrictMode>
 );

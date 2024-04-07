@@ -1,31 +1,42 @@
-import { useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useAuth } from "@clerk/clerk-react";
-import { getDomainsInfo } from "../requests/aws";
+import { getDomainsInfo, handleUpload } from "../requests/aws";
 import RecordsTable from "../components/RecordsTable";
-
+import { Box, Button, FileButton } from "@mantine/core";
+import { AuthContext } from "../context/token";
 
 const DomainPage = () => {
   const params = useParams();
-  const { getToken } = useAuth();
+  const {state } = useContext(AuthContext)
+
+  const [data, setData] = useState(null);
+  const [file, setFile] = useState<File | null>(null);
 
   useEffect(() => {
     async function fetchData() {
-      const tkn = await getToken();
 
-      const response = await getDomainsInfo(tkn, params?.id || "");
-      console.log(response);
+      const response = await getDomainsInfo(state.token, params?.id || "");
+
+      console.log(response , "response");
+      setData(response)
     }
 
     fetchData();
-  }, [getToken, params.id]);
+  }, [state, params.id]);
 
   console.log(params);
 
-  return <div>
-    DomainPage
-    <RecordsTable />
-    </div>;
+  return (
+    <Box m={'md'}>
+      <Box p={'md'}>
+      <FileButton onChange={setFile} accept="json">
+        {(props) => <Button {...props}>Bulk JSON Upload</Button>}
+      </FileButton>
+      {file && <Button mx={'md'} disabled={!state.clientConnected} onClick={()=>handleUpload(file,state.token,params.id)}>Submit</Button>}
+      </Box>
+      <RecordsTable data={data} />
+    </Box>
+  );
 };
 
 export default DomainPage;

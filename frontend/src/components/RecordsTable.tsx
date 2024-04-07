@@ -1,61 +1,43 @@
+import { Box, Table } from "@mantine/core";
+import { DNSConfig, ResourceRecord, ResourceRecordSet } from "../requests/interfaces";
 
-import { CompactTable } from '@table-library/react-table-library/compact';
-import { useTheme } from '@table-library/react-table-library/theme';
-import {
-  DEFAULT_OPTIONS,
-  getTheme,
-} from '@table-library/react-table-library/mantine';
+const RecordsTable = ({ data }: { data: DNSConfig | null }) => {
+  console.log(data, "DATA");
 
-
-interface TableDataRow {
-  id: number;
-  name: string;
-  age: number;
-  city: string;
-}
-
-const RecordsTable = () => {
-    const COLUMNS = [
-        { label: 'ID', renderCell: (item : TableDataRow) => item.id, resize: true },
-        {
-          label: 'Name',
-          renderCell: (item : TableDataRow) => item.name,
-          resize: true,
-        },
-        { label: 'Age', renderCell: (item : TableDataRow) => item.age, resize: true },
-        {
-          label: 'City',
-          renderCell: (item : TableDataRow) => item.city,
-          resize: true,
-        },
-      ];
-
-      const tableData = [
-        { id: 1, name: 'John', age: 30, city: 'New York' },
-        { id: 2, name: 'Alice', age: 25, city: 'Los Angeles' },
-        { id: 3, name: 'Bob', age: 35, city: 'Chicago' },
-        { id: 4, name: 'Emily', age: 28, city: 'San Francisco' },
-        { id: 5, name: 'Michael', age: 40, city: 'Boston' },
-    ];
-
-    const mantineTheme = getTheme(DEFAULT_OPTIONS);
-    const customTheme = {
-      HeaderRow: `
-        background-color: #eaf5fd;
-      `,
-      
-
-    };
-    
-
-    const theme = useTheme([mantineTheme, customTheme]); 
-    
-    return (
-        <>
-          <CompactTable columns={COLUMNS} data={{nodes : tableData}} theme={theme} />
-        </>
-      );
-    
-}
+  return (
+    <Box p={"md"} style={{ border : '2px solid white'}}>
+      <Table highlightOnHover withColumnBorders>
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Name</Table.Th>
+            <Table.Th>Type</Table.Th>
+            <Table.Th>TTL</Table.Th>
+            <Table.Th>Records</Table.Th>
+          </Table.Tr>
+          {/* <br/> */}
+        </Table.Thead>
+        
+        <Table.Tbody>
+          {data?.ResourceRecordSets?.map((record: ResourceRecordSet , index : number) => (
+            <Table.Tr key={record.Name + index}>
+              <Table.Td>{record.Name}</Table.Td>
+              <Table.Td>{record.Type}</Table.Td>
+              <Table.Td>{record.TTL}</Table.Td>
+              <Table.Td>
+                <ul>
+                  {record.ResourceRecords.map(
+                    (item: ResourceRecord, index: number) => (
+                      <li key={index}>{item.Value}</li>
+                    )
+                  )}
+                </ul>
+              </Table.Td>
+            </Table.Tr>
+          ))}
+        </Table.Tbody>
+      </Table>
+    </Box>
+  );
+};
 
 export default RecordsTable;

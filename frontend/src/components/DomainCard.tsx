@@ -9,7 +9,7 @@ const DomainCard = ({ data }: { data: HostedZone }) => {
     <Card shadow="sm" padding="lg" radius="md">
       <Group justify="space-between" mt="md" mb="xs">
         <Text fw={500}>Name : {data.Name}</Text>
-        <Badge color="pink">{data.Id}</Badge>
+        <Badge color="pink" p={'sm'}>{data.Id}</Badge>
       </Group>
 
       <Text size="sm">DNS Record Count : {data.ResourceRecordSetCount}</Text>

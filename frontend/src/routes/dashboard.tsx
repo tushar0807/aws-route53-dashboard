@@ -1,27 +1,15 @@
-import { useAuth } from "@clerk/clerk-react";
 import { Button, Flex } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { getHostedZones } from "../requests/aws";
 import { HostedZonesResponse } from "../requests/interfaces";
 import DomainCard from "../components/DomainCard";
+import { AuthContext } from "../context/token";
 
 export default function DashboardPage() {
-  const { getToken } = useAuth();
-
-  const [token, setToken] = useState<string | null>(null);
+  
+  const {state } = useContext(AuthContext)
   const [data, setData] = useState<HostedZonesResponse | null>();
 
-  useEffect(() => {
-    const fetchToken = async () => {
-      const tkn = await getToken();
-
-      setToken(tkn);
-
-      console.log("TOKEN: ", tkn);
-    };
-
-    fetchToken();
-  }, []);
 
   return (
     <>
@@ -30,7 +18,7 @@ export default function DashboardPage() {
       <p></p>
 
       <ul>
-        <Button onClick={async () => setData(await getHostedZones(token))}>
+        <Button onClick={async () => setData(await getHostedZones(state.token))}>
           Get Hosted Zones
         </Button>
       </ul>

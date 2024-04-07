@@ -1,0 +1,24 @@
+{
+  "resource_record_sets": [
+    {
+      "Name": "sub12.r53-dashboard.com",
+      "ResourceRecords": [
+        {
+          "Value": "203.0.113.100"
+        }
+      ],
+      "TTL": 180,
+      "Type": "A"
+    },
+    {
+      "Name": "sub13.r53-dashboard.com",
+      "ResourceRecords": [
+        {
+          "Value": "198.51.100.200"
+        }
+      ],
+      "TTL": 240,
+      "Type": "A"
+    }
+  ]
+}
