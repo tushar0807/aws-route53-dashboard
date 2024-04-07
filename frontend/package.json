@@ -10,12 +10,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@clerk/clerk-react": "^4.30.10",
     "@emotion/react": "^11.11.4",
+    "@mantine/carousel": "^7.7.1",
     "@mantine/core": "^7.7.1",
     "@mantine/hooks": "^7.7.1",
     "@mantine/modals": "^7.7.1",
     "@mantine/notifications": "^7.7.1",
     "@table-library/react-table-library": "^4.1.7",
+    "embla-carousel-autoplay": "^7.1.0",
+    "embla-carousel-react": "^7.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.3"

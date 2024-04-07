@@ -1,5 +1,8 @@
 import { SignUp } from "@clerk/clerk-react"
  
 export default function SignUpPage() {
-  return <SignUp />;
+  return(
+  <main style={{display : 'flex' , justifyContent : 'center' , marginTop : '48px'}}>
+  <SignUp />
+</main>)
 }
