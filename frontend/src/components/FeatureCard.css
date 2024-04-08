@@ -1,0 +1,20 @@
+.card-container{
+    /* border: 2px solid black; */
+    box-shadow: 8px 8px black;
+    padding: 4px;
+    margin-bottom: 12px;
+    min-height: 200px;
+    background-color: hsl(180, 90%, 25%);
+    /* position: relative;
+    top: 12px; */
+}
+
+.card-title{
+    color: beige;
+    text-align: center;
+}
+
+.card-description{
+    padding: 8px;
+    color: black;
+}

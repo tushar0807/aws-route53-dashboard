@@ -1,7 +1,11 @@
 .navbar {
-  background-color: #333;
+  background-color: hsla(238, 93%, 11%, 0.462);
   color: white;
   padding: 10px 20px;
+  position: sticky;
+  top: 0px;
+  backdrop-filter: blur(4px);
+  z-index: 1;
 }
 
 .navbar-container {
@@ -16,8 +20,8 @@
 }
 
 .logo {
-  height: 30px; /* Adjust the height of the logo as needed */
-  margin-right: 10px; /* Add margin between logo and title */
+  height: 30px; 
+  margin-right: 10px; 
 }
 
 .navbar-title {

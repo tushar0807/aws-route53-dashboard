@@ -1,4 +1,4 @@
-import { Button, Flex } from "@mantine/core";
+import { Box, Button, Flex } from "@mantine/core";
 import { useContext, useState } from "react";
 import { getHostedZones } from "../requests/aws";
 import { HostedZonesResponse } from "../requests/interfaces";
@@ -12,7 +12,7 @@ export default function DashboardPage() {
 
 
   return (
-    <>
+    <Box p={'lg'}>
       <h1>Dashboard page</h1>
       <br />
       <p></p>
@@ -48,6 +48,6 @@ export default function DashboardPage() {
           </Flex>
         </div>
       )}
-    </>
+    </Box>
   );
 }

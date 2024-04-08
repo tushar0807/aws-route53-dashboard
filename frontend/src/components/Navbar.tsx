@@ -45,7 +45,7 @@ const Navbar = () => {
     }
 
     fetchData()
-  },[state])
+  },[getToken, isSignedIn, sessionId, setState, state, userId])
 
 
   return (
