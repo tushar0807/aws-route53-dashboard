@@ -187,7 +187,6 @@ router.post(
         console.log("response", response.json());
         res.status(response.metadata.httpStatusCode).json(response.json());
         return;
-        
       } catch (parseError) {
         console.error(
           "Error parsing",
@@ -195,11 +194,36 @@ router.post(
           parseError.message,
           parseError
         );
-        //   return res.status(parseError.$metadata.httpStatusCode).json({ error: parseError.message });
         return res.json({ error: "Parsing Error" });
       }
     });
   }
 );
+
+router.post("/deleteRecord", ClerkExpressRequireAuth(), async (req, res) => {
+  const { data, HostedZoneId } = req.body;
+
+  if (
+    !userClientMap.has(req.auth.userId) ||
+    userClientMap.get(req.auth.userId) == undefined
+  ) {
+    res.status(500).json({ error: "No AWS Client detected" });
+    return;
+  }
+
+  const client = userClientMap.get(req.auth.userId).r53client;
+  const command = new ChangeResourceRecordSetsCommand({
+    HostedZoneId: HostedZoneId,
+    ChangeBatch: {
+      Changes: [{ Action: "DELETE", ResourceRecordSet: data }],
+      Comment: "Delete Record by AWS R53 DashBoard",
+    },
+  });
+
+  const response = await client.send(command);
+  console.log("response", response,response.$metadata.httpStatusCode);
+  res.status(response.$metadata.httpStatusCode).json(response);
+  return ;
+});
 
 module.exports = router;
