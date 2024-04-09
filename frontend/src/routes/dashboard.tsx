@@ -1,5 +1,5 @@
 import { Box, Button, Flex } from "@mantine/core";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { getHostedZones } from "../requests/aws";
 import { HostedZonesResponse } from "../requests/interfaces";
 import DomainCard from "../components/DomainCard";
@@ -9,6 +9,10 @@ export default function DashboardPage() {
   
   const {state } = useContext(AuthContext)
   const [data, setData] = useState<HostedZonesResponse | null>();
+
+  useEffect(()=>{
+    console.log("DASHBOARD" , state)
+  })
 
 
   return (

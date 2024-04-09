@@ -57,6 +57,8 @@ const Navbar = () => {
             </Link>
             <span className="navbar-title">AWS DASHBOARD</span>
           </div>
+
+          <Link to='/dashboard'>Dashboard</Link>
           <nav className="navbar-links">
             <SignedOut>
               <Link to="/sign-in">Sign In</Link>

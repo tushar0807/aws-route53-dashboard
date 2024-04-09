@@ -1,3 +1,5 @@
+import { ResourceRecordSet } from "./interfaces";
+
 export const CreateClient = async (token: string | null) => {
   const response = await fetch("http://localhost:5000/aws/createAWSClient", {
     method: "POST",
@@ -13,9 +15,8 @@ export const CreateClient = async (token: string | null) => {
   return response.ok;
 };
 
-export const getHostedZones = async (token : string | null) => {
-
-  console.log("GHZ" ,token)
+export const getHostedZones = async (token: string | null) => {
+  console.log("GHZ", token);
   try {
     const response = await fetch("http://localhost:5000/aws/getHostedZones", {
       method: "GET",
@@ -26,82 +27,114 @@ export const getHostedZones = async (token : string | null) => {
     });
 
     // console.log("HOSTED ZONES: ", response.json());
-    return response.json()
+    return response.json();
   } catch (error) {
     console.log("HZ", error);
-    return error
+    return error;
   }
 };
 
+export const getClientStatus = async (token: string | null) => {
+  try {
+    const response = await fetch("http://localhost:5000/aws/getClientStatus", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-export const getClientStatus = async (token : string | null) => {
-    try {
-      const response = await fetch("http://localhost:5000/aws/getClientStatus", {
+    return response.json();
+  } catch (error) {
+    console.log("GET STATUS ERROR : ", error);
+    return error;
+  }
+};
+
+export const getDomainsInfo = async (token: string | null, id: string) => {
+  try {
+    const response = await fetch(
+      `http://localhost:5000/aws/getDomainInfo?domainId=${id}`,
+      {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-      });
-  
-      return response.json()
-    } catch (error) {
-        console.log("GET STATUS ERROR : " , error)
-      return error
-    }
-  };
+      }
+    );
 
-  export const getDomainsInfo = async (token : string | null , id : string) => {
-    try {
-      const response = await fetch(`http://localhost:5000/aws/getDomainInfo?domainId=${id}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-  
-      return response.json()
-    } catch (error) {
-        console.log("GET STATUS ERROR : " , error)
-      return error
-    }
-  };
+    return response.json();
+  } catch (error) {
+    console.log("GET STATUS ERROR : ", error);
+    return error;
+  }
+};
 
-export const handleUpload = (file : File , token : string | null , hostedDomain : string | undefined) => {
-  console.log(file)
-    if (file.size && hostedDomain) {
-      const formData = new FormData();
-      formData.append('file', file);
+export const handleUpload = async (
+  file: File,
+  token: string | null,
+  hostedDomain: string | undefined
+) => {
+  console.log(file);
+  if (file.size && hostedDomain) {
+    const formData = new FormData();
+    formData.append("file", file);
 
-      console.log("sending request")
+    console.log("sending request");
 
-      fetch('http://localhost:5000/aws/uploadBulk', {
-        method: 'POST',
-        body: formData,
-        headers: {
-          Authorization: `Bearer ${token}`,
-          HostedZoneId : hostedDomain
-        },
-      })
-      .then(response => {
-        console.log(response)
+    fetch("http://localhost:5000/aws/uploadBulk", {
+      method: "POST",
+      body: formData,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        HostedZoneId: hostedDomain,
+      },
+    })
+      .then((response) => {
+        console.log(response);
         if (response.ok) {
-          console.log('File uploaded successfully.');
+          console.log("File uploaded successfully.");
           // Optionally, you can perform further actions upon successful upload
         } else {
-          console.error('Error uploading file:', response.statusText);
+          console.error("Error uploading file:", response.statusText);
           // Handle error
         }
       })
-      .catch(error => {
-        console.error('Error uploading file:', error);
+      .catch((error) => {
+        console.error("Error uploading file:", error);
         // Handle error
       });
-    } else {
-      console.error('No file selected.');
-      // Handle case where no file is selected
-    }
-  };
+  } else {
+    console.error("No file selected.");
+    // Handle case where no file is selected
+  }
+};
 
-  
+export const handleDelete = async (
+  token: string | null,
+  data: ResourceRecordSet,
+  hostedZoneId: string | undefined
+) => {
+  console.log(token, data, hostedZoneId);
+  try {
+
+    const response = await fetch("http://localhost:5000/aws/deleteRecord", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        HostedZoneId: hostedZoneId,
+        data : data
+      }),
+    });
+
+
+    const responseData = await response.json();
+    return responseData.ok
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};
