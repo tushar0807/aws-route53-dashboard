@@ -85,6 +85,7 @@ router.get("/getClientStatus", ClerkExpressRequireAuth(), (req, res) => {
   console.log(userClientMap);
 
   if (userClientMap.has(req.auth.userId)) {
+    console.log("CLIENT EXISTS")
     res.json({ msg: "Client  Exists" });
     return;
   }

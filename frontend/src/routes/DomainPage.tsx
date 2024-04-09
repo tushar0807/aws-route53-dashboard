@@ -18,7 +18,7 @@ const DomainPage = () => {
   const [file, setFile] = useState<File | null>(null);
   const [load, setLoad] = useState<boolean>(false);
   const [opened, { open, close }] = useDisclosure(false);
-  const [vizdata, setVizData] = useState<unknown>(false);
+  // const [vizdata, setVizData] = useState<[string , string | number][]>([]);
 
   useEffect(() => {
     async function fetchData() {
@@ -33,7 +33,7 @@ const DomainPage = () => {
     }
 
     fetchData();
-  }, [state, params.id, load , vizdata]);
+  }, [state, params.id, load ]);
 
   console.log(params);
 
@@ -48,14 +48,16 @@ const DomainPage = () => {
         );
       });
 
-      console.log([
+      const x : [string , number][] = Array.from(newData, ([name, value]) => [name, value])
+      // setVizData([
+      //   ["Type", "No. of Records"],
+      //   ...x,
+      // ]);
+
+      return [
         ["Type", "No. of Records"],
-        ...Array.from(newData, ([name, value]) => [name, value]),
-      ]);
-      setVizData([
-        ["Type", "No. of Records"],
-        ...Array.from(newData, ([name, value]) => [name, value]),
-      ]);
+        ...x,
+      ]
   }
 
   return (
@@ -121,7 +123,7 @@ const DomainPage = () => {
       >
         <Chart
           chartType="PieChart"
-          data={vizdata}
+          data={vizDatafunc()}
           options={{is3D : true , title : "Record Type Distribution" , legend : true  }}
           width={"100%"}
           height={"400px"}

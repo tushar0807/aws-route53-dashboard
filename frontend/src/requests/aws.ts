@@ -1,6 +1,6 @@
 import { ResourceRecordSet } from "./interfaces";
 
-export const CreateClient = async (token: string | null) => {
+export const CreateClient = async (token: string | null , access_key : string , secret_key : string) => {
   const response = await fetch("http://localhost:5000/aws/createAWSClient", {
     method: "POST",
     headers: {
@@ -8,8 +8,8 @@ export const CreateClient = async (token: string | null) => {
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
-      AWS_SECRET_ACCESS_KEY: "ZWsnFbbdd0jRYVfnf5M8wcou2cgU6p+g/0NUTEnV",
-      AWS_ACCESS_KEY_ID: "AKIAZQ3DTRG3EUFQZBMZ",
+      AWS_SECRET_ACCESS_KEY: access_key,
+      AWS_ACCESS_KEY_ID: secret_key,
     }),
   });
   return response.ok;
@@ -25,8 +25,6 @@ export const getHostedZones = async (token: string | null) => {
         Authorization: `Bearer ${token}`,
       },
     });
-
-    // console.log("HOSTED ZONES: ", response.json());
     return response.json();
   } catch (error) {
     console.log("HZ", error);
