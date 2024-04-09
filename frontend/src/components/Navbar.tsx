@@ -33,7 +33,7 @@ const Navbar = () => {
       const tkn = await getToken();
       if (tkn == "" || tkn == undefined || tkn == null) return;
       const response = await fetch(
-        "http://localhost:5000/aws/getClientStatus",
+        "https://aws-route53-dashboard.onrender.com/aws/getClientStatus",
         {
           method: "GET",
           headers: {

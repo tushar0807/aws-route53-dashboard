@@ -1,7 +1,7 @@
 import { ResourceRecordSet } from "./interfaces";
 
 export const CreateClient = async (token: string | null , access_key : string , secret_key : string) => {
-  const response = await fetch("http://localhost:5000/aws/createAWSClient", {
+  const response = await fetch("https://aws-route53-dashboard.onrender.com/aws/createAWSClient", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -18,7 +18,7 @@ export const CreateClient = async (token: string | null , access_key : string , 
 export const getHostedZones = async (token: string | null) => {
   console.log("GHZ", token);
   try {
-    const response = await fetch("http://localhost:5000/aws/getHostedZones", {
+    const response = await fetch("https://aws-route53-dashboard.onrender.com/aws/getHostedZones", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -34,7 +34,7 @@ export const getHostedZones = async (token: string | null) => {
 
 export const getClientStatus = async (token: string | null) => {
   try {
-    const response = await fetch("http://localhost:5000/aws/getClientStatus", {
+    const response = await fetch("https://aws-route53-dashboard.onrender.com/aws/getClientStatus", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -52,7 +52,7 @@ export const getClientStatus = async (token: string | null) => {
 export const getDomainsInfo = async (token: string | null, id: string) => {
   try {
     const response = await fetch(
-      `http://localhost:5000/aws/getDomainInfo?domainId=${id}`,
+      `https://aws-route53-dashboard.onrender.com/aws/getDomainInfo?domainId=${id}`,
       {
         method: "GET",
         headers: {
@@ -81,7 +81,7 @@ export const handleUpload = async (
 
     console.log("sending request");
 
-    fetch("http://localhost:5000/aws/uploadBulk", {
+    fetch("https://aws-route53-dashboard.onrender.com/aws/uploadBulk", {
       method: "POST",
       body: formData,
       headers: {
@@ -117,7 +117,7 @@ export const handleDelete = async (
   console.log(token, data, hostedZoneId);
   try {
 
-    const response = await fetch("http://localhost:5000/aws/deleteRecord", {
+    const response = await fetch("https://aws-route53-dashboard.onrender.com/aws/deleteRecord", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
