@@ -1,5 +1,4 @@
 import { Tooltip } from '@mantine/core'
-import React from 'react'
 
 const CustomTooltip = ({label}: {label : string}) => {
   return (
