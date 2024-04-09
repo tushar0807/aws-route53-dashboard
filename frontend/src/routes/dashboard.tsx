@@ -37,7 +37,7 @@ export default function DashboardPage() {
             direction="row"
             wrap="wrap"
           >
-            {data.HostedZones.map((zone) => (
+            {data.HostedZones?.map((zone) => (
               <div
                 key={zone.Id}
                 style={{
