@@ -1,12 +1,23 @@
-import { Box, Button, Group, Input, Table } from "@mantine/core";
+import {
+  Box,
+  Button,
+  Group,
+  Input,
+  Modal,
+  NumberInput,
+  Select,
+  Table,
+} from "@mantine/core";
 import {
   DNSConfig,
   ResourceRecord,
   ResourceRecordSet,
 } from "../requests/interfaces";
-import { handleDelete } from "../requests/aws";
+import { handleDelete, UpdateRecord } from "../requests/aws";
 import CustomTooltip from "./Tooltip";
 import { useState } from "react";
+import { useDisclosure } from "@mantine/hooks";
+import { useParams } from "react-router-dom";
 
 const RecordsTable = ({
   data,
@@ -21,17 +32,33 @@ const RecordsTable = ({
   setLoad: React.Dispatch<React.SetStateAction<boolean>>;
   setData: React.Dispatch<React.SetStateAction<DNSConfig | null>>;
 }) => {
-  console.log(data, "DATA");
-
+  
   const [search, setSearch] = useState<string>("");
+
+
   const handleSearch = (search: string) => {
-    console.log("HANDLE SEARCH");
     const newData = data?.ResourceRecordSets.filter((record) =>
       record.Name.includes(search)
     );
     console.log("new DATA", newData);
     if (newData) setData({ ResourceRecordSets: newData });
   };
+
+  const [opened, { open, close }] = useDisclosure(false);
+
+  const {id} = useParams()
+
+  
+
+  const [editData, setEditData] = useState<ResourceRecordSet>({
+    Name: "",
+    Type: "",
+    TTL: "",
+    ResourceRecords: [
+      { Value: "192.0.2.1" }
+    ]
+  }
+);
 
   return (
     <Box
@@ -53,25 +80,25 @@ const RecordsTable = ({
       </Group>
 
       <Table highlightOnHover withColumnBorders>
-        <Table.Thead>
-          <Table.Tr>
-            <Table.Th>
-              Name
-              <CustomTooltip label="name of domain" />
-            </Table.Th>
-            <Table.Th>Type
-              <CustomTooltip label = "The type specifies whether this is a public hosted zone (for routing traffic on the internet) or a private hosted zone (for routing traffic within and among VPCs)." />
-            </Table.Th>
-            <Table.Th>TTL 
-              <CustomTooltip label = "in seconds" />
-            </Table.Th>
-            <Table.Th>Records
-              <CustomTooltip label = "Route 53 assigns name servers when you create a hosted zone. The assigned name servers can't be changed." />
-            </Table.Th>
-            <Table.Th>Modify</Table.Th>
-          </Table.Tr>
-          {/* <br/> */}
-        </Table.Thead>
+      <Table.Thead>
+      <Table.Tr>
+        <Table.Th>
+          Name
+          <CustomTooltip label="name of domain" />
+        </Table.Th>
+        <Table.Th>Type
+          <CustomTooltip label = "The type specifies whether this is a public hosted zone (for routing traffic on the internet) or a private hosted zone (for routing traffic within and among VPCs)." />
+        </Table.Th>
+        <Table.Th>TTL 
+          <CustomTooltip label = "in seconds" />
+        </Table.Th>
+        <Table.Th>Records
+          <CustomTooltip label = "Route 53 assigns name servers when you create a hosted zone. The assigned name servers can't be changed." />
+        </Table.Th>
+        <Table.Th>Modify</Table.Th>
+      </Table.Tr>
+      {/* <br/> */}
+    </Table.Thead>
 
         <Table.Tbody>
           {data?.ResourceRecordSets?.map(
@@ -117,7 +144,15 @@ const RecordsTable = ({
                       <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
                     </svg>
                   </Button>
-                  <Button mx={"lg"}>
+                  <Button onClick={()=>{
+                    setEditData({
+                      Name : record.Name,
+                      TTL : record.TTL,
+                      Type : record.Type,
+                      ResourceRecords : record.ResourceRecords
+                    });
+                    open();
+                  }} mx={"lg"}>
                     <svg
                       viewBox="0 0 24 24"
                       fill="currentColor"
@@ -133,6 +168,40 @@ const RecordsTable = ({
           )}
         </Table.Tbody>
       </Table>
+
+      <Modal opened={opened} onClose={close} title="Edit Record">
+        <Input.Wrapper required label="Name">
+          <Input
+            value={editData.Name}
+            onChange={(e) => setEditData({ ...editData, Name: e.target.value })}
+          />
+        </Input.Wrapper>
+
+        <Select my={'md'}
+          label="Type"
+          placeholder="Pick value"
+          data={["SOA", "A", "TXT", "NS", "CNAME", "MX", "NAPTR", "PTR", "SRV", "SPF", "AAAA", "CAA", "DS"]}
+          value={editData.Type}
+          onChange={(e)=>{setEditData({...editData , Type : e ? e : ''})}}
+        />
+
+        <Input.Wrapper label="TTL" my={'md'}>
+          <NumberInput
+            value={editData.TTL}
+            onChange={(e) => {
+              console.log(e);
+              setEditData({ ...editData, TTL: String(e) });
+            }}
+          />
+        </Input.Wrapper>
+
+        <Button my='lg' onClick={async ()=>{
+          const resp = await UpdateRecord(token ,id , {Name : editData.Name , Type : editData.Type , TTL : Number(editData.TTL), ResourceRecords : editData.ResourceRecords});
+          console.log(resp)
+          close();
+          setLoad(true);
+        }} >Update</Button>
+      </Modal>
     </Box>
   );
 };

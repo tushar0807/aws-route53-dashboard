@@ -23,8 +23,8 @@ const Navbar = () => {
   const { isSignedIn, sessionId, getToken, userId } = useAuth();
   const [opened, { open, close }] = useDisclosure(false);
   const [clientState, setClientState] = useState({
-    access_key: "",
-    secret_key: "",
+    access_key: "AKIAZQ3DTRG3F6CP3SDN",
+    secret_key: "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",
   });
 
   React.useEffect(() => {
@@ -41,20 +41,23 @@ const Navbar = () => {
           },
         }
       );
-      if (state.token === "" && isSignedIn && sessionId && tkn && setState) {
-        setState({
+      if  ((!state.clientConnected && response.ok  ||  (state.token === "")) && isSignedIn && sessionId && tkn && setState) {
+        setState(() => ({
           token: tkn,
           isSignedIn: isSignedIn,
           sessionId: sessionId,
           userId: userId,
-          clientConnected: response.ok,
-        });
+          clientConnected: response.ok,    
+        })
+      );
       }
 
       console.log("After", state, response.ok);
     }
 
     fetchData();
+
+    
   }, [getToken, isSignedIn, sessionId, setState, state, userId]);
 
   return (
@@ -123,7 +126,7 @@ const Navbar = () => {
               clientState.secret_key
             );
 
-            console.log(result);
+            console.log("GETCLIENTSTATUS" , result);
             setState && setState({ ...state, clientConnected: result });
             close();
           }}

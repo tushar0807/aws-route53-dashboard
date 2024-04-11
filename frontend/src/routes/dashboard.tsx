@@ -1,5 +1,5 @@
-import { Box, Button, Flex, Group, Input, Modal, Switch, Text } from "@mantine/core";
-import { useContext, useEffect, useState } from "react";
+import {  Affix, Box, Button, Flex, Group, Input, Modal, Switch, Text } from "@mantine/core";
+import { useContext, useState } from "react";
 import { getHostedZones, handleCreateHostedZone } from "../requests/aws";
 import { HostedZonesResponse } from "../requests/interfaces";
 import DomainCard from "../components/DomainCard";
@@ -7,7 +7,7 @@ import { AuthContext } from "../context/token";
 import { useDisclosure } from "@mantine/hooks";
 
 export default function DashboardPage() {
-  const { state } = useContext(AuthContext);
+  const { state , setNoti  } = useContext(AuthContext);
   const [data, setData] = useState<HostedZonesResponse | null>();
   const [opened, { open, close }] = useDisclosure(false);
 
@@ -17,9 +17,6 @@ export default function DashboardPage() {
     checked: false,
   });
 
-  useEffect(() => {
-    console.log("DASHBOARD", state);
-  });
 
   return (
     <Box p={"lg"}>
@@ -84,11 +81,18 @@ export default function DashboardPage() {
         /></Group>
 
         <Button onClick={async()=>{
-          handleCreateHostedZone(state.token , modalState);
+          const response = await handleCreateHostedZone(state.token , modalState);
+          setNoti && setNoti(response.name , 5000);
           setModalState({name: '' , comment : '' , checked : false})
           close()
         }}>Create Now</Button>
       </Modal>
+
+      <Button onClick={()=>{
+        setNoti && setNoti("THIS IS CUSTOM NOTI" , 5000)
+      }} >Noti</Button>
+
+      {state.errorMsg && <Affix position={{top : '50px' , right : '50px'}}><Text color="red" >{state.errorMsg}</Text></Affix>}
     </Box>
   );
 }

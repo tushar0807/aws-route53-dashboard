@@ -1,4 +1,4 @@
-import { ResourceRecordSet } from "./interfaces";
+import { ResourceRecord, ResourceRecordSet } from "./interfaces";
 
 export const CreateClient = async (token: string | null , access_key : string , secret_key : string) => {
   
@@ -159,8 +159,34 @@ export const handleCreateHostedZone = async (
     });
 
     const responseData = await response.json();
+    return responseData
+  } catch (error) {
+    console.error("Error:", error);
+    return error
+  }
+};
+
+export const UpdateRecord = async(token : string ,HostedZoneId : string | undefined , data : {Name : string , Type : string , TTL : number , ResourceRecords : ResourceRecord[]} ) =>{
+
+  try {
+
+    const response = await fetch("http://localhost:5000/aws/updateRecord", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        data : data,
+        HostedZoneId
+      }),
+    });
+
+    const responseData = await response.json();
     return responseData.ok
   } catch (error) {
     console.error("Error:", error);
   }
-};
+
+} 
+

@@ -18,6 +18,8 @@ const DomainPage = () => {
   const [file, setFile] = useState<File | null>(null);
   const [load, setLoad] = useState<boolean>(false);
   const [opened, { open, close }] = useDisclosure(false);
+  
+
   // const [vizdata, setVizData] = useState<[string , string | number][]>([]);
 
   useEffect(() => {
@@ -129,6 +131,7 @@ const DomainPage = () => {
           height={"400px"}
         />
       </Modal>
+
     </Box>
   );
 };
