@@ -59,9 +59,15 @@ const RecordsTable = ({
               Name
               <CustomTooltip label="name of domain" />
             </Table.Th>
-            <Table.Th>Type</Table.Th>
-            <Table.Th>TTL</Table.Th>
-            <Table.Th>Records</Table.Th>
+            <Table.Th>Type
+              <CustomTooltip label = "The type specifies whether this is a public hosted zone (for routing traffic on the internet) or a private hosted zone (for routing traffic within and among VPCs)." />
+            </Table.Th>
+            <Table.Th>TTL 
+              <CustomTooltip label = "in seconds" />
+            </Table.Th>
+            <Table.Th>Records
+              <CustomTooltip label = "Route 53 assigns name servers when you create a hosted zone. The assigned name servers can't be changed." />
+            </Table.Th>
             <Table.Th>Modify</Table.Th>
           </Table.Tr>
           {/* <br/> */}
