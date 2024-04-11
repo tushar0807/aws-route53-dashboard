@@ -7,15 +7,17 @@ const {
   CreateHostedZoneCommand,
 } = require("@aws-sdk/client-route-53");
 const { Route53DomainsClient } = require("@aws-sdk/client-route-53-domains");
-const { ClerkExpressRequireAuth, clients } = require("@clerk/clerk-sdk-node");
-const { time } = require("console");
+const { ClerkExpressRequireAuth } = require("@clerk/clerk-sdk-node");
 const express = require("express");
 const router = express.Router();
 const fs = require("fs");
 
-// router.use(ClerkExpressRequireAuth())
+const IncorrectClientHandler = (userId) => {
+  userClientMap.delete(userId);
+  return;
+};
 
-let userClientMap = new Map();  
+let userClientMap = new Map();
 const multer = require("multer");
 
 const UPLOADS_DIR = "./uploads";
@@ -34,9 +36,13 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-function createClient(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, userId , sessionId) {
-  
-  console.log(AWS_ACCESS_KEY_ID , AWS_SECRET_ACCESS_KEY)
+function createClient(
+  AWS_ACCESS_KEY_ID,
+  AWS_SECRET_ACCESS_KEY,
+  userId,
+  sessionId
+) {
+  console.log(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY);
   try {
     const route53Client = new Route53Client({
       region: "global",
@@ -67,7 +73,7 @@ function createClient(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, userId , session
   }
 }
 
-router.post("/createAWSClient", ClerkExpressRequireAuth(), async(req, res) => {
+router.post("/createAWSClient", ClerkExpressRequireAuth(), async (req, res) => {
   console.log(req.auth.userId, req.auth.sessionId);
   if (!userClientMap.has(req.auth.userId)) {
     createClient(
@@ -79,21 +85,33 @@ router.post("/createAWSClient", ClerkExpressRequireAuth(), async(req, res) => {
   }
 
   if (userClientMap.has(req.auth.userId)) {
-    res.json({ msg: "Client Created Successfully" });
-    return;
+    try {
+      console.log("IN TRY CREATE");
+      const client = userClientMap.get(req.auth.userId).r53client;
+      const command = new ListHostedZonesCommand({});
+
+      const response = await client.send(command);
+      console.log("CREATE RESPONSE" , response)
+      if (response.$metadata.httpStatusCode < 400) { res.json({ msg: "Client  Exists" }); return }
+      else {res.status(404).json({"error" : "Invalid Credentials"}); IncorrectClientHandler(req.auth.userId) ;return}
+    } catch (error) {
+      if (error.Code === "InvalidClientTokenId") {
+        IncorrectClientHandler(req.auth.userId);
+      }
+      res.status(400).json(error);
+      return;
+    }
   }
 
   res.status(400).json({ error: "Invalid Credentials" });
 });
 
-router.get("/getClientStatus", ClerkExpressRequireAuth(), (req, res) => {
+router.get("/getClientStatus", ClerkExpressRequireAuth(), async (req, res) => {
   console.log("GET CLIENT CALLED", req.auth.userId);
   console.log(userClientMap);
 
   if (userClientMap.has(req.auth.userId)) {
-    console.log("CLIENT EXISTS")
-    res.json({ msg: "Client  Exists" });
-    return;
+    res.json({ msg: "Client  Exists" }); return;
   }
   res.status(400).json({ error: "Create a client" });
 });
@@ -108,7 +126,7 @@ router.get("/getHostedZones", ClerkExpressRequireAuth(), async (req, res) => {
   }
 
   try {
-    console.log("IN TRY")
+    console.log("IN TRY");
     const client = userClientMap.get(req.auth.userId).r53client;
     const command = new ListHostedZonesCommand({});
 
@@ -116,12 +134,12 @@ router.get("/getHostedZones", ClerkExpressRequireAuth(), async (req, res) => {
 
     const response = await client.send(command);
 
-    
-
-    console.log("Hosted Zones:", response);
+    console.log("response", response);
     res.json(response);
   } catch (error) {
-    console.error("Error:", error);
+    if (error.Code === "InvalidClientTokenId") {
+      IncorrectClientHandler(req.auth.userId);
+    }
     res.status(401).json(error);
   }
 });
@@ -146,7 +164,7 @@ router.get("/getDomainInfo", ClerkExpressRequireAuth(), async (req, res) => {
     console.log("Domains :", response);
     res.json(response);
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error:", error.Code);
     res.status(401).json(error);
   }
 });
@@ -234,41 +252,88 @@ router.post("/deleteRecord", ClerkExpressRequireAuth(), async (req, res) => {
   });
 
   const response = await client.send(command);
-  console.log("response", response,response.$metadata.httpStatusCode);
+  console.log("response", response, response.$metadata.httpStatusCode);
   res.status(response.$metadata.httpStatusCode).json(response);
-  return ;
+  return;
 });
 
-router.post("/createHostedZone", ClerkExpressRequireAuth(), async (req, res) => {
-  
-  console.log(req.body)
-  const { name, comment , checked } = req.body.data;
+router.post(
+  "/createHostedZone",
+  ClerkExpressRequireAuth(),
+  async (req, res) => {
+    console.log(req.body);
+    const { name, comment, checked } = req.body.data;
 
-  console.log(name , comment , checked);
+    console.log(name, comment, checked);
 
-  if (
-    !userClientMap.has(req.auth.userId) ||
-    userClientMap.get(req.auth.userId) == undefined
-  ) {
-    res.status(500).json({ error: "No AWS Client detected" });
-    return;
+    if (
+      !userClientMap.has(req.auth.userId) ||
+      userClientMap.get(req.auth.userId) == undefined
+    ) {
+      res.status(500).json({ error: "No AWS Client detected" });
+      return;
+    }
+
+    try{
+
+      const client = userClientMap.get(req.auth.userId).r53client;
+      const command = new CreateHostedZoneCommand({
+        Name: name,
+        HostedZoneConfig: {
+          Comment: comment,
+          PrivateZone: checked,
+        },
+        CallerReference: Date.now(),
+      });
+
+      const response = await client.send(command);
+      console.log("response", response, response.$metadata.httpStatusCode);
+      res.status(response.$metadata.httpStatusCode).json(response);
+      return;
+    }
+    catch(error){
+      res.status(400).json(error)
+    }
   }
+);
 
-  const client = userClientMap.get(req.auth.userId).r53client;
-  const command = new CreateHostedZoneCommand({
-    Name : name,
-    HostedZoneConfig : {
-      Comment : comment,
-      PrivateZone : checked
-    },
-    CallerReference : Date.now()
 
-  });
+router.post(
+  "/updateRecord",
+  ClerkExpressRequireAuth(),
+  async (req, res) => {
+    // const HostedZoneId = req.headers.hostedzoneid;
+   
+    console.log("UPLOAD CALLED", {
+      HostedZoneId: req.body.HostedZoneId,
+      ResourceRecordSet : req.body.data
+      
+    } , );
+      try {
+        
 
-  const response = await client.send(command);
-  console.log("response", response,response.$metadata.httpStatusCode);
-  res.status(response.$metadata.httpStatusCode).json(response);
-  return ;
-});
+        const client = userClientMap.get(req.auth.userId).r53client;
+        const command = new ChangeResourceRecordSetsCommand({
+          HostedZoneId: req.body.HostedZoneId,
+          ChangeBatch: {
+            Changes: [{
+              Action : 'UPSERT',
+              ResourceRecordSet : req.body.data
+            }],
+            Comment: "Bulk Upload by AWS R53 DashBoard",
+          },
+        });
+
+        const response = await client.send(command)
+        res.json(response)
+        return
+
+      }
+      catch(error){
+        console.log(error)
+        res.status(404).json(error.message)
+      }
+    }   
+);
 
 module.exports = router;
