@@ -41,7 +41,7 @@ const DomainPage = () => {
     const newData = new Map<string, number>();
     console.log("VIZ DATA CALLED")
 
-      data?.ResourceRecordSets.map((record) => {
+      data?.ResourceRecordSets?.map((record) => {
         newData.set(
           record.Type,
           (newData.has(record.Type) ? newData.get(record.Type)! : 0) + 1
@@ -100,7 +100,7 @@ const DomainPage = () => {
           </Button>
         )}
 
-        <Button onClick={open} style={{ float: "right" }}>
+        <Button disabled={!data?.ResourceRecordSets} onClick={open} style={{ float: "right" }}>
           Visualise
         </Button>
       </Box>

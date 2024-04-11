@@ -1,34 +1,45 @@
-import { Box, Button, Flex } from "@mantine/core";
+import { Box, Button, Flex, Group, Input, Modal, Switch, Text } from "@mantine/core";
 import { useContext, useEffect, useState } from "react";
-import { getHostedZones } from "../requests/aws";
+import { getHostedZones, handleCreateHostedZone } from "../requests/aws";
 import { HostedZonesResponse } from "../requests/interfaces";
 import DomainCard from "../components/DomainCard";
 import { AuthContext } from "../context/token";
+import { useDisclosure } from "@mantine/hooks";
 
 export default function DashboardPage() {
-  
-  const {state } = useContext(AuthContext)
+  const { state } = useContext(AuthContext);
   const [data, setData] = useState<HostedZonesResponse | null>();
+  const [opened, { open, close }] = useDisclosure(false);
 
-  useEffect(()=>{
-    console.log("DASHBOARD" , state)
-  })
+  const [modalState, setModalState] = useState({
+    name: "",
+    comment: "",
+    checked: false,
+  });
 
+  useEffect(() => {
+    console.log("DASHBOARD", state);
+  });
 
   return (
-    <Box p={'lg'}>
+    <Box p={"lg"}>
       <h1>Dashboard page</h1>
       <br />
       <p></p>
 
-      <ul>
-        <Button onClick={async () => setData(await getHostedZones(state.token))}>
+      <Group>
+        <Button
+          onClick={async () => setData(await getHostedZones(state.token))}
+          disabled={!state.clientConnected}
+        >
           Get Hosted Zones
         </Button>
-      </ul>
+
+        <Button disabled={!state.clientConnected} onClick={open}>Create</Button>
+      </Group>
 
       {data && (
-        <div style={{padding : '8px'}}>
+        <div style={{ padding: "8px" }}>
           <h2>Hosted Zones</h2>
           <Flex
             gap="xl"
@@ -37,7 +48,7 @@ export default function DashboardPage() {
             direction="row"
             wrap="wrap"
           >
-            {data.HostedZones.map((zone) => (
+            {data?.HostedZones?.map((zone) => (
               <div
                 key={zone.Id}
                 style={{
@@ -52,6 +63,32 @@ export default function DashboardPage() {
           </Flex>
         </div>
       )}
+
+      <Modal opened={opened} onClose={close} title="Create Hosted Zone">
+        <Input.Wrapper required label="Name">
+          <Input value={modalState.name} onChange={(e)=>setModalState({...modalState , name:e.target.value})}  />
+        </Input.Wrapper>
+
+        <Input.Wrapper label="Comments">
+          <Input value={modalState.comment} onChange={(e)=>setModalState({...modalState , comment:e.target.value})} />
+        </Input.Wrapper>
+
+        
+        <Group><Text>Visiblity</Text>
+        <Switch
+          m="md"
+          checked={modalState.checked}
+          onLabel="Private"
+          offLabel="public"
+          onChange={(e)=>setModalState({...modalState , checked : e.currentTarget.checked})}
+        /></Group>
+
+        <Button onClick={async()=>{
+          handleCreateHostedZone(state.token , modalState);
+          setModalState({name: '' , comment : '' , checked : false})
+          close()
+        }}>Create Now</Button>
+      </Modal>
     </Box>
   );
 }

@@ -1,10 +1,4 @@
-import {
-  Box,
-  Button,
-  Group,
-  Input,
-  Table,
-} from "@mantine/core";
+import { Box, Button, Group, Input, Table } from "@mantine/core";
 import {
   DNSConfig,
   ResourceRecord,
@@ -39,8 +33,6 @@ const RecordsTable = ({
     if (newData) setData({ ResourceRecordSets: newData });
   };
 
-
-
   return (
     <Box
       p={"md"}
@@ -67,12 +59,10 @@ const RecordsTable = ({
               Name
               <CustomTooltip label="name of domain" />
             </Table.Th>
-            <Table.Th>
-                Type
-            </Table.Th>
+            <Table.Th>Type</Table.Th>
             <Table.Th>TTL</Table.Th>
             <Table.Th>Records</Table.Th>
-            <Table.Th>Delete</Table.Th>
+            <Table.Th>Modify</Table.Th>
           </Table.Tr>
           {/* <br/> */}
         </Table.Thead>
@@ -119,6 +109,16 @@ const RecordsTable = ({
                       <path d="M14 11l0 6" />
                       <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
                       <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                    </svg>
+                  </Button>
+                  <Button mx={"lg"}>
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      height="1.5em"
+                      width="1.5em"
+                    >
+                      <path d="M6.3 12.3l10-10a1 1 0 011.4 0l4 4a1 1 0 010 1.4l-10 10a1 1 0 01-.7.3H7a1 1 0 01-1-1v-4a1 1 0 01.3-.7zM8 16h2.59l9-9L17 4.41l-9 9V16zm10-2a1 1 0 012 0v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6c0-1.1.9-2 2-2h6a1 1 0 010 2H4v14h14v-6z" />
                     </svg>
                   </Button>
                 </Table.Td>

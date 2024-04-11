@@ -1,6 +1,8 @@
 import { ResourceRecordSet } from "./interfaces";
 
 export const CreateClient = async (token: string | null , access_key : string , secret_key : string) => {
+  
+  console.log(access_key , secret_key)
   const response = await fetch("http://localhost:5000/aws/createAWSClient", {
     method: "POST",
     headers: {
@@ -8,8 +10,8 @@ export const CreateClient = async (token: string | null , access_key : string , 
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
-      AWS_SECRET_ACCESS_KEY: access_key,
-      AWS_ACCESS_KEY_ID: secret_key,
+      AWS_SECRET_ACCESS_KEY: secret_key,
+      AWS_ACCESS_KEY_ID: access_key,
     }),
   });
   return response.ok;
@@ -129,6 +131,32 @@ export const handleDelete = async (
       }),
     });
 
+
+    const responseData = await response.json();
+    return responseData.ok
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};
+
+
+export const handleCreateHostedZone = async (
+  token: string | null,
+  data : unknown
+) => {
+  console.log(token, data);
+  try {
+
+    const response = await fetch("http://localhost:5000/aws/createHostedZone", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        data : data
+      }),
+    });
 
     const responseData = await response.json();
     return responseData.ok
