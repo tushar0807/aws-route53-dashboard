@@ -1,6 +1,7 @@
-import { ResourceRecordSet } from "./interfaces";
+import { ResourceRecord, ResourceRecordSet } from "./interfaces";
 
 export const CreateClient = async (token: string | null , access_key : string , secret_key : string) => {
+
   const response = await fetch("https://aws-route53-dashboard.onrender.com/aws/createAWSClient", {
     method: "POST",
     headers: {
@@ -8,8 +9,8 @@ export const CreateClient = async (token: string | null , access_key : string , 
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
-      AWS_SECRET_ACCESS_KEY: access_key,
-      AWS_ACCESS_KEY_ID: secret_key,
+      AWS_SECRET_ACCESS_KEY: secret_key,
+      AWS_ACCESS_KEY_ID: access_key,
     }),
   });
   return response.ok;
@@ -73,7 +74,7 @@ export const handleUpload = async (
   file: File,
   token: string | null,
   hostedDomain: string | undefined
-) => {
+) =>  {
   console.log(file);
   if (file.size && hostedDomain) {
     const formData = new FormData();
@@ -81,7 +82,9 @@ export const handleUpload = async (
 
     console.log("sending request");
 
-    fetch("https://aws-route53-dashboard.onrender.com/aws/uploadBulk", {
+    try {
+      const response = await fetch("https://aws-route53-dashboard.onrender.com/aws/uploadBulk"
+
       method: "POST",
       body: formData,
       headers: {
@@ -89,24 +92,25 @@ export const handleUpload = async (
         HostedZoneId: hostedDomain,
       },
     })
-      .then((response) => {
-        console.log(response);
-        if (response.ok) {
-          console.log("File uploaded successfully.");
-          // Optionally, you can perform further actions upon successful upload
-        } else {
-          console.error("Error uploading file:", response.statusText);
-          // Handle error
-        }
-      })
-      .catch((error) => {
-        console.error("Error uploading file:", error);
-        // Handle error
-      });
-  } else {
-    console.error("No file selected.");
-    // Handle case where no file is selected
+
+    const rjson  = await response.json()
+
+      console.log("BULK" , rjson)
+      return rjson
+        
+    } catch (error) {
+      console.log("BULK" , error)
+      return error
+      
+    }
+
   }
+  else{
+    return { $metadata : {httpStatusCode : 400} , name : 'No file Selected'}
+  }
+
+    
+      
 };
 
 export const handleDelete = async (
@@ -136,3 +140,56 @@ export const handleDelete = async (
     console.error("Error:", error);
   }
 };
+
+
+export const handleCreateHostedZone = async (
+  token: string | null,
+  data : unknown
+) => {
+  console.log(token, data);
+  try {
+
+    const response = await fetch("https://aws-route53-dashboard.onrender.com/aws/createHostedZone", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        data : data
+      }),
+    });
+
+    const responseData = await response.json();
+    return responseData
+  } catch (error) {
+    console.error("Error:", error);
+    return error
+  }
+};
+
+export const UpdateRecord = async(token : string ,HostedZoneId : string | undefined , data : {Name : string , Type : string , TTL : number , ResourceRecords : ResourceRecord[]} ) =>{
+
+  try {
+
+    const response = await fetch("https://aws-route53-dashboard.onrender.com/aws/updateRecord", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        data : data,
+        HostedZoneId
+      }),
+    });
+
+    const responseData = await response.json();
+    return responseData
+  } catch (error) {
+    console.error("Error:", error);
+    return error
+  }
+
+} 
+

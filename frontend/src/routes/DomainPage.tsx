@@ -1,4 +1,7 @@
-import { useContext, useEffect, useState } from "react";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
+import {  useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getDomainsInfo, handleUpload } from "../requests/aws";
 import RecordsTable from "../components/RecordsTable";
@@ -12,13 +15,34 @@ import { useDisclosure } from "@mantine/hooks";
 
 const DomainPage = () => {
   const params = useParams();
-  const { state } = useContext(AuthContext);
+  const { state , setNoti } = useContext(AuthContext);
 
   const [data, setData] = useState<DNSConfig | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [load, setLoad] = useState<boolean>(false);
   const [opened, { open, close }] = useDisclosure(false);
+  
+
   // const [vizdata, setVizData] = useState<[string , string | number][]>([]);
+
+  const vizDatafunc = ()=>{
+    const newData = new Map<string, number>();
+    console.log("VIZ DATA CALLED")
+
+      data?.ResourceRecordSets?.map((record) => {
+        newData.set(
+          record.Type,
+          (newData.has(record.Type) ? newData.get(record.Type)! : 0) + 1
+        );
+      });
+
+      const x : [string , number][] = Array.from(newData, ([name, value]) => [name, value])
+
+      return [
+        ["Type", "No. of Records"],
+        ...x,
+      ]
+  } 
 
   useEffect(() => {
     async function fetchData() {
@@ -33,32 +57,10 @@ const DomainPage = () => {
     }
 
     fetchData();
-  }, [state, params.id, load ]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state, params?.id, load]);
 
-  console.log(params);
-
-  const vizDatafunc = ()=>{
-    const newData = new Map<string, number>();
-    console.log("VIZ DATA CALLED")
-
-      data?.ResourceRecordSets.map((record) => {
-        newData.set(
-          record.Type,
-          (newData.has(record.Type) ? newData.get(record.Type)! : 0) + 1
-        );
-      });
-
-      const x : [string , number][] = Array.from(newData, ([name, value]) => [name, value])
-      // setVizData([
-      //   ["Type", "No. of Records"],
-      //   ...x,
-      // ]);
-
-      return [
-        ["Type", "No. of Records"],
-        ...x,
-      ]
-  }
+  
 
   return (
     <Box m={"md"}>
@@ -94,13 +96,33 @@ const DomainPage = () => {
           <Button
             mx={"md"}
             disabled={!state.clientConnected}
-            onClick={() => handleUpload(file, state.token, params.id)}
+            onClick={async() => {const response = await handleUpload(file, state.token, params.id);
+              console.log("BULKKKK" , response , response.$metadata)
+              if (Number(response?.$metadata?.httpStatusCode) >= 400) {
+                setNoti &&
+                  setNoti(
+                    "Error\n" + response?.name,
+                    "rgba(200,10,10,0.7)",
+                    5000*2
+                  );
+                  setFile(null)
+              } else {
+                setNoti &&
+                  setNoti(
+                    "Success \n : Uploaded Successfully",
+                    "rgba(9, 146, 104,0.8)",
+                    5000
+                  );
+                  setFile(null)
+                  setLoad(!load)
+              }
+            }}
           >
             Submit
           </Button>
         )}
 
-        <Button onClick={open} style={{ float: "right" }}>
+        <Button disabled={!data?.ResourceRecordSets} onClick={open} style={{ float: "right" }}>
           Visualise
         </Button>
       </Box>

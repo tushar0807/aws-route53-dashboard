@@ -41,20 +41,23 @@ const Navbar = () => {
           },
         }
       );
-      if (state.token === "" && isSignedIn && sessionId && tkn && setState) {
-        setState({
+      if  ((!state.clientConnected && response.ok  ||  (state.token === "")) && isSignedIn && sessionId && tkn && setState) {
+        setState(() => ({
           token: tkn,
           isSignedIn: isSignedIn,
           sessionId: sessionId,
           userId: userId,
-          clientConnected: response.ok,
-        });
+          clientConnected: response.ok,    
+        })
+      );
       }
 
       console.log("After", state, response.ok);
     }
 
     fetchData();
+
+    
   }, [getToken, isSignedIn, sessionId, setState, state, userId]);
 
   return (
@@ -123,7 +126,7 @@ const Navbar = () => {
               clientState.secret_key
             );
 
-            console.log(result);
+            console.log("GETCLIENTSTATUS" , result);
             setState && setState({ ...state, clientConnected: result });
             close();
           }}

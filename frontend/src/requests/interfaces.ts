@@ -28,7 +28,7 @@ export interface ResourceRecord {
 export interface ResourceRecordSet {
   Name: string;
   Type: string;
-  TTL: number;
+  TTL: number | string;
   ResourceRecords: ResourceRecord[];
 }
 
