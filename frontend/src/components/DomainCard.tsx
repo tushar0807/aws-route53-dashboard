@@ -6,7 +6,7 @@ const DomainCard = ({ data }: { data: HostedZone }) => {
 
     const navigate = useNavigate()
   return (
-    <Card shadow="sm" padding="lg" radius="md">
+    <Card padding="lg" radius="sm" withBorder style={{ boxShadow: '4px 4px rgba(0,0,0,0.7)'}}>
       <Group justify="space-between" mt="md" mb="xs">
         <Text fw={500}>Name : {data.Name}</Text>
         <Badge color="pink" p={'sm'}>{data.Id}</Badge>

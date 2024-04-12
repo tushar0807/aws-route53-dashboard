@@ -75,7 +75,7 @@ export const handleUpload = async (
   file: File,
   token: string | null,
   hostedDomain: string | undefined
-) => {
+) =>  {
   console.log(file);
   if (file.size && hostedDomain) {
     const formData = new FormData();
@@ -83,7 +83,8 @@ export const handleUpload = async (
 
     console.log("sending request");
 
-    fetch("http://localhost:5000/aws/uploadBulk", {
+    try {
+      const response = await fetch("http://localhost:5000/aws/uploadBulk", {
       method: "POST",
       body: formData,
       headers: {
@@ -91,24 +92,25 @@ export const handleUpload = async (
         HostedZoneId: hostedDomain,
       },
     })
-      .then((response) => {
-        console.log(response);
-        if (response.ok) {
-          console.log("File uploaded successfully.");
-          // Optionally, you can perform further actions upon successful upload
-        } else {
-          console.error("Error uploading file:", response.statusText);
-          // Handle error
-        }
-      })
-      .catch((error) => {
-        console.error("Error uploading file:", error);
-        // Handle error
-      });
-  } else {
-    console.error("No file selected.");
-    // Handle case where no file is selected
+
+    const rjson  = await response.json()
+
+      console.log("BULK" , rjson)
+      return rjson
+        
+    } catch (error) {
+      console.log("BULK" , error)
+      return error
+      
+    }
+
   }
+  else{
+    return { $metadata : {httpStatusCode : 400} , name : 'No file Selected'}
+  }
+
+    
+      
 };
 
 export const handleDelete = async (
@@ -183,9 +185,10 @@ export const UpdateRecord = async(token : string ,HostedZoneId : string | undefi
     });
 
     const responseData = await response.json();
-    return responseData.ok
+    return responseData
   } catch (error) {
     console.error("Error:", error);
+    return error
   }
 
 } 

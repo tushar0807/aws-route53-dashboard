@@ -1,4 +1,5 @@
 import {
+  Affix,
   Box,
   Button,
   Group,
@@ -15,9 +16,11 @@ import {
 } from "../requests/interfaces";
 import { handleDelete, UpdateRecord } from "../requests/aws";
 import CustomTooltip from "./Tooltip";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { useParams } from "react-router-dom";
+import { AuthContext } from "../context/token";
+import Notifications from "./Notification";
 
 const RecordsTable = ({
   data,
@@ -34,6 +37,7 @@ const RecordsTable = ({
 }) => {
   
   const [search, setSearch] = useState<string>("");
+  const {setNoti , state} = useContext(AuthContext)
 
 
   const handleSearch = (search: string) => {
@@ -121,7 +125,7 @@ const RecordsTable = ({
                   <Button
                     onClick={() => {
                       handleDelete(token, record, HostedZoneId);
-                      setLoad(true);
+                      setLoad((prev)=>{console.log(prev); return !prev});
                     }}
                   >
                     <svg
@@ -196,12 +200,28 @@ const RecordsTable = ({
         </Input.Wrapper>
 
         <Button my='lg' onClick={async ()=>{
-          const resp = await UpdateRecord(token ,id , {Name : editData.Name , Type : editData.Type , TTL : Number(editData.TTL), ResourceRecords : editData.ResourceRecords});
-          console.log(resp)
+          const response = await UpdateRecord(token ,id , {Name : editData.Name , Type : editData.Type , TTL : Number(editData.TTL), ResourceRecords : editData.ResourceRecords});
+          console.log(response , "Update")
+          if (response?.$metadata?.httpStatusCode >= 400) {
+            setNoti &&
+              setNoti(
+                "Error :" + response.name,
+                "rgba(200,10,10,0.7)",
+                5000
+              );
+          } else {
+            setNoti &&
+              setNoti(
+                "Success : Updated Records.",
+                "rgba(9, 146, 104,0.8)",
+                5000
+              );
+          }
           close();
           setLoad(true);
         }} >Update</Button>
       </Modal>
+      {state.errorMsg && <Affix position={{bottom : '24px' , right : '24px'}}><Notifications msg={state.errorMsg.msg} color={state.errorMsg?.color} /></Affix>}
     </Box>
   );
 };

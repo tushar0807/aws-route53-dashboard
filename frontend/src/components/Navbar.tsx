@@ -23,8 +23,8 @@ const Navbar = () => {
   const { isSignedIn, sessionId, getToken, userId } = useAuth();
   const [opened, { open, close }] = useDisclosure(false);
   const [clientState, setClientState] = useState({
-    access_key: "AKIAZQ3DTRG3F6CP3SDN",
-    secret_key: "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",
+    access_key: "",
+    secret_key: "",
   });
 
   React.useEffect(() => {
