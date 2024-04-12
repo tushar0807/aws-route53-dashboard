@@ -83,7 +83,7 @@ export const handleUpload = async (
     console.log("sending request");
 
     try {
-      const response = await fetch("https://aws-route53-dashboard.onrender.com/aws/uploadBulk"
+      const response = await fetch("https://aws-route53-dashboard.onrender.com/aws/uploadBulk" , {
 
       method: "POST",
       body: formData,
