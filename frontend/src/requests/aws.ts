@@ -1,8 +1,7 @@
 import { ResourceRecord, ResourceRecordSet } from "./interfaces";
 
 export const CreateClient = async (token: string | null , access_key : string , secret_key : string) => {
-  
-  console.log(access_key , secret_key)
+
   const response = await fetch("https://aws-route53-dashboard.onrender.com/aws/createAWSClient", {
     method: "POST",
     headers: {
@@ -84,7 +83,8 @@ export const handleUpload = async (
     console.log("sending request");
 
     try {
-      const response = await fetch("https://aws-route53-dashboard.onrender.com/aws/uploadBulk", {
+      const response = await fetch("https://aws-route53-dashboard.onrender.com/aws/uploadBulk"
+
       method: "POST",
       body: formData,
       headers: {
